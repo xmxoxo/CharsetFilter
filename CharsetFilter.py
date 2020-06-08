@@ -5,8 +5,8 @@ __author__ = 'xmxoxo<xmxoxo@qq.com>'
 
 '''
 UTF-8字符集分析过滤工具 CharsetFilter
-版本: V 1.0.2
-更新：xmxoxo 2020/3/11
+版本: V 1.0.3
+更新：xmxoxo 2020/6/8
 
 工具说明：本工具把UTF8字符集分成了39个子集，可对文本文件中的字符集进行分析，
 统计各类字符的总数以及出现的种类数。同时还可以方便地过滤或者保留的字符，
@@ -35,7 +35,7 @@ import os
 import sys
 import time
 
-gblVersion = '1.0.2'
+gblVersion = '1.0.3'
 
 # 全局字典
 gbl_lstName = [
@@ -82,7 +82,7 @@ gbl_lstName = [
 ]
 
 gbl_lstSeg = [
-    (0x0009, 0x000A, 0x000D),  #1系统字符(保留制表/换行/回车)
+    ([0x0009, 0x000A, 0x000D]),  #1系统字符(保留制表/换行/回车)
     [0x0020, 0x007E],  #2英文半角(含空格)
     [0x007F, 0x00A0],  #3控制字符
     ([0x00A1, 0x076D], 
@@ -102,7 +102,7 @@ gbl_lstSeg = [
     [0x2440, 0x244A],  #16识别符号
     [0x2460, 0x24FF],  #17序号字符
     [0x2500, 0x257F],  #18制表字符
-    ([0x2580, 0x2595], [0x25A0, 0x25FF], 0x25FD, 0x25FE),  #19方块元素
+    ([0x2580, 0x2595], [0x25A0, 0x25FF],  0x25FD, 0x25FE),  #19方块元素
     ([0x2600, 0x26AF], [0x26B3,0x26BE], 
         0x26C4, 0x26C5, 0x26CE, 0x26D4, 
         0x26EA, 0x26F2, 0x26F3, 0x26F5, 0x26FA, 0x26FD),  #20杂项符号
@@ -115,7 +115,7 @@ gbl_lstSeg = [
     [0x2FF0, 0x2FFB],  #26汉字结构
     [0x3001, 0x303F],  #27标点符号
     [0x3040, 0x30FF],  #28日文字符
-    [0x3105, 0x318E],  #29韩文字母
+    [0x3131, 0x318E],  #29韩文字母
     [0x31C0, 0x31EF],  #30笔划字符
     [0x31F0, 0x31FF],  #31日文拼音
     [0x3200, 0x32FF],  #32带框字符
@@ -158,7 +158,7 @@ gbl_lstIndex = [
     [0x2FF0, 0x2FFB],
     [0x3001, 0x303F],
     [0x3040, 0x30FF],
-    [0x3105, 0x318E],
+    [0x3131, 0x318E],
     [0x31C0, 0x31EF],
     [0x31F0, 0x31FF],
     [0x3200, 0x32FF],
@@ -265,12 +265,25 @@ class CharsetFilter():
         return index+1
 
 
-    # 对文本文件进行过滤, delchar: 删除哪些字符集
-    def txtfilter (self, txt, delchar = [0,3]):
-        pass
+    '''
+    对文本进行过滤, 
+    remove: 删除哪些字符集，
+         如果 remove 和 remain 同时未指定，则 remove = [0,3]
+    remain: 保留哪些字符集，
+    '''
+    def txtfilter (self, txt, remove=[], remain = []):
         rettxt = ''
         if not txt:
             return ''
+
+        #计算过滤字符集
+        if not remove :
+            if not remain:
+                # 默认过滤 0,3
+                remove = [0, 3]
+            else:
+                remove = list(range(40))
+        delchar = list(set(range(40)).difference(set(remain)) & set(remove))
 
         for x in list(txt):
             index = self.segIndex (ord(x))
@@ -278,7 +291,7 @@ class CharsetFilter():
                 rettxt += x
         return rettxt
 
-    # 对字符进行分析,detail=1返回明细
+    # 对文本进行分析, detail=1返回明细
     def charAnalyze (self, txt, detail=0):
         lstret = [0 for x in range(len(gbl_lstName))]
         listWord = [dict() for x in range(len(gbl_lstName))]
@@ -370,18 +383,14 @@ def main():
 
     if isfilter:
         start = time.time()
-        #计算过滤字符集
-        if remove:
-            delchar = remove
-        else:
-            delchar = list(set(range(40)).difference(set(remain)))
+       
         #生成输出文件名
         if not outfile:
             outfile = filename[:-4] + '_out.txt'    
 
         print('正在过滤字符...')
         rettxt = ''
-        rettxt = objC.txtfilter(txt, delchar)
+        rettxt = objC.txtfilter(txt, remove=remove, remain=remain)
         if rettxt:
             objC.savetofile(rettxt,outfile)
             print('文件已过滤，并保存为:%s' % outfile)
@@ -412,11 +421,13 @@ def test ():
     print('字符集分析报告'.center(40,'-'))
     print(strRet)
     
-    rettxt = objC.txtfilter(txt, delchar=[0,3])
+    remove = []
+    remain = [2, 36] # 只保留 中文汉字 和 英文半角
+    rettxt = objC.txtfilter(txt, remove=remove, remain=remain)
     print('过滤结果：\n%s' % rettxt)
     print('原始长度:%d, 过滤后长度:%d' % ( len(txt), len(rettxt)))
 
 if __name__ == '__main__':
     pass
-    main()
-    #test()
+    #main()
+    test()
