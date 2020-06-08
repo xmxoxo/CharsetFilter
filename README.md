@@ -5,9 +5,9 @@
 
 UTF-8字符集分析过滤工具 CharsetFilter
 
-版本: V 1.0.2
+版本: V 1.0.3
 
-更新：2020/4/21 16:03
+更新：2020/6/8 13:59
 
 工具说明：本工具把UTF8字符集分成了40个子集，可对文本文件中的字符集进行分析，
 统计各类字符的总数以及出现的种类数。同时还可以方便地过滤或者保留的字符，
@@ -27,7 +27,28 @@ pip install CharsetFilter
 CharsetFilter_test
 ```
 
-## 使用案例说明：
+##　对象调用使用案例
+
+```
+# 测试 
+def test ():
+    objC = CharsetFilter()
+    txt = '中大1三K┫□＼，≯ó㈥l｡ ･ ･ ｡ ﾉ ♡不ε﹣￥▽￣ˊˋ﹉▲āōē﹑'
+    
+    strRet = objC.charAnalyze (txt, detail=1)
+    print('字符集分析报告'.center(40,'-'))
+    print(strRet)
+    
+    remove = []
+    remain = [2, 36] # 只保留 中文汉字 和 英文半角
+    rettxt = objC.txtfilter(txt, remove=remove, remain=remain)
+    print('过滤结果：\n%s' % rettxt)
+    print('原始长度:%d, 过滤后长度:%d' % ( len(txt), len(rettxt)))
+```
+
+
+## 命令行使用案例
+
 
 分析文本字符集，输出简要信息
 ```
