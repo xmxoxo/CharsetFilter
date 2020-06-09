@@ -31,6 +31,7 @@ CharsetFilter_test
 
 ```
 # 测试 
+from CharsetFilter.CharsetFilter import CharsetFilter
 def test ():
     objC = CharsetFilter()
     txt = '中大1三K┫□＼，≯ó㈥l｡ ･ ･ ｡ ﾉ ♡不ε﹣￥▽￣ˊˋ﹉▲āōē﹑'
